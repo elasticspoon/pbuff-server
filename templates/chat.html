@@ -1,0 +1,12 @@
+{{define "scripts"}}
+<script src="/chat.js"></script>
+{{end}}
+{{define "body"}}
+Chat Room {{.Id}}
+<div id="chat">
+</div>
+<form id="send">
+  <input type="text" name="message" value="">
+  <input type="submit" name="submit" value="Send Message">
+</form>
+{{end}}
