@@ -1,9 +1,12 @@
 {{define "scripts"}} {{end}}
 {{define "body"}}
-<form>
-  <label for="roomNum">Room Number</label>
-  <input type="number" name="roomNum" value="">
-  <input type="submit" name="" value="Connect To Room">
-</form>
+<h2>There are {{len .}} rooms in use.</h2>
+{{range .}}
+<div>
+  <span>Chat Room {{.Id}}</span>
+  <span>{{len .Users}} Users</span>
+  <a href="/chat/{{.Id}}">Join Room</a>
+</div>
+{{end}}
 <a href="/new">New Chat</a>
 {{end}}

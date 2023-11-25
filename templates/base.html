@@ -4,10 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Site</title>
+  <style>
+    span {
+      display: block;
+    }
+  </style>
 </head>
 
 <body>
-  {{ template "body" }}
+  {{ template "body" . }}
 </body>
 
 <script src="/livereload.js"></script>

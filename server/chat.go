@@ -20,7 +20,7 @@ func Index(w http.ResponseWriter, _ *http.Request) {
 		log.Printf("Error parsing template: %s", err)
 	}
 
-	err = t.Execute(w, nil)
+	err = t.Execute(w, chatRooms)
 	if err != nil {
 		log.Printf("Error executing template: %s", err)
 	}

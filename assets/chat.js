@@ -22,3 +22,4 @@ ws.addEventListener("open", () => {
   ws.addEventListener("message", addMessage);
   form.addEventListener("submit", sendMessage);
 });
+
