@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var chatRooms = make(map[int]*ChatRoom)
+var chatRooms = make([]*ChatRoom, 0)
 
 func Index(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -39,11 +39,11 @@ func ShowChat(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error converting chatRoomId to int: %s", err)
 	}
 
-	cr, ok := chatRooms[id]
-	if !ok {
+	if len(chatRooms) == 0 || id > len(chatRooms) || id < 0 || chatRooms[id] == nil {
 		log.Printf("Chat room does not exist: %d", id)
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
+	cr := chatRooms[id]
 
 	err = t.Execute(w, cr)
 	if err != nil {
@@ -53,8 +53,18 @@ func ShowChat(w http.ResponseWriter, r *http.Request) {
 
 func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	cr := NewChatRoom()
-	cr.Id = len(chatRooms)
-	chatRooms[cr.Id] = cr
+	id := 0
+	for ; id < len(chatRooms); id++ {
+		if chatRooms[id] == nil {
+			break
+		}
+	}
+	cr.Id = id
+	if id == len(chatRooms) {
+		chatRooms = append(chatRooms, cr)
+	} else {
+		chatRooms[id] = cr
+	}
 
 	go cr.Run()
 
@@ -69,11 +79,11 @@ func JoinChatRoom(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error converting chatRoomId to int: %s", err)
 	}
 
-	cr, ok := chatRooms[id]
-	if !ok {
+	if len(chatRooms) == 0 || id > len(chatRooms) || id < 0 || chatRooms[id] == nil {
 		log.Printf("Chat room does not exist: %d", id)
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
+	cr := chatRooms[id]
 
 	log.Printf("Joining chat room: %d", id)
 	ServeWs(cr, w, r)

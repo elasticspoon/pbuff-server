@@ -9,9 +9,9 @@ import (
 )
 
 type Client struct {
-	ChatRoom *ChatRoom
-	Conn     *websocket.Conn
-	Send     chan []byte
+	chatRoom *ChatRoom
+	conn     *websocket.Conn
+	send     chan []byte
 }
 
 var upgrader = websocket.Upgrader{
@@ -24,38 +24,56 @@ var (
 	space   = []byte{' '}
 )
 
-func (c *Client) Read() {
+// client reading from the websocket connection
+// and writing to the chat room broadcast channel
+func (c *Client) read() {
+	// cleanup
 	defer func() {
-		c.ChatRoom.Unregister <- c
-		c.Conn.Close()
+		c.chatRoom.unregister <- c
+		c.conn.Close()
 	}()
 
 	for {
-		_, message, err := c.Conn.ReadMessage()
+		// loops reading messages until an error occurs
+		// then defer closes and unregisters the client
+		_, message, err := c.conn.ReadMessage()
 		if err != nil {
-			c.ChatRoom.Unregister <- c
-			c.Conn.Close()
+			// i dont think this is necessary will happen in the defer
+			// c.chatRoom.unregister <- c
+			// c.conn.Close()
 			break
 		}
 		message = bytes.TrimSpace(bytes.ReplaceAll(message, newline, space))
-		c.ChatRoom.Broadcast <- message
+		c.chatRoom.broadcast <- message
 	}
 }
 
-func (c *Client) Write() {
+// this function writes to the websocket connection from chatRoom send channel
+func (c *Client) write() {
+	// sender does not unregister the client on close
 	defer func() {
-		c.Conn.Close()
+		c.conn.Close()
 	}()
-	for {
-		select {
-		case message, ok := <-c.Send:
-			if !ok {
-				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
-				return
-			}
-			c.Conn.WriteMessage(websocket.TextMessage, message)
-		}
+
+	// read from the send channel until it is closed
+	for message := range c.send {
+		c.conn.WriteMessage(websocket.TextMessage, message)
 	}
+	c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+	// for {
+	// 	select {
+	// 	// blocks until a message is received or the channel is closed
+	// 	// send is written to by the chat room broadcast channel
+	// 	case message, ok := <-c.send:
+	// 		// if the channel is closed, close the websocket connection
+	// 		if !ok {
+	// 			c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+	// 			return
+	// 		}
+	// 		// write the message to the websocket connection
+	// 		c.conn.WriteMessage(websocket.TextMessage, message)
+	// 	}
+	// }
 }
 
 func ServeWs(chatRoom *ChatRoom, w http.ResponseWriter, r *http.Request) {
@@ -64,9 +82,9 @@ func ServeWs(chatRoom *ChatRoom, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &Client{ChatRoom: chatRoom, Conn: conn, Send: make(chan []byte, 256)}
-	client.ChatRoom.Register <- client
+	client := &Client{chatRoom: chatRoom, conn: conn, send: make(chan []byte, 256)}
+	client.chatRoom.register <- client
 
-	go client.Write()
-	go client.Read()
+	go client.write()
+	go client.read()
 }
