@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -43,8 +44,23 @@ func (c *Client) read() {
 			// c.conn.Close()
 			break
 		}
-		message = bytes.TrimSpace(bytes.ReplaceAll(message, newline, space))
-		c.chatRoom.broadcast <- message
+		msg := &Message{}
+		err = json.Unmarshal(message, msg)
+		if err != nil {
+			log.Printf("Error unmarshalling message: %s, error: %s", message, err)
+			continue
+		}
+
+		body := []byte(msg.Body)
+		body = bytes.TrimSpace(bytes.ReplaceAll(body, newline, space))
+		msg.Body = string(body)
+
+		m, err := json.Marshal(msg)
+		if err != nil {
+			log.Printf("Error marshalling message: %s", err)
+			continue
+		}
+		c.chatRoom.broadcast <- m
 	}
 }
 

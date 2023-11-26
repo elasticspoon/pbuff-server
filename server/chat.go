@@ -13,6 +13,11 @@ import (
 
 var chatRooms = make([]*ChatRoom, 0)
 
+type Message struct {
+	Body string `json:"body"`
+	Time int    `json:"time"`
+}
+
 func Index(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	t, err := template.ParseFiles("templates/base.html", "templates/index.html")
