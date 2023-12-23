@@ -31,9 +31,9 @@ func (cr *ChatRoom) Run() {
 			if _, ok := cr.Users[client]; ok {
 				delete(cr.Users, client)
 				close(client.send)
-				if len(cr.Users) == 0 {
-					chatRooms[cr.Id] = nil
-				}
+				// if len(cr.Users) == 0 {
+				// 	chatRooms[cr.Id] = nil
+				// }
 			}
 			// if a message is broadcasted, loop through all the users in the chat room
 		case message := <-cr.broadcast:

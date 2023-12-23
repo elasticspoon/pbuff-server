@@ -13,10 +13,10 @@ func main() {
 
 	r.Use(middleware.Logger)
 
-	r.Get("/livereload.js", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./assets/livereload.js")
-	})
-	r.Get("/alive", server.ServerAlive)
+	// r.Get("/livereload.js", func(w http.ResponseWriter, r *http.Request) {
+	// 	http.ServeFile(w, r, "./assets/livereload.js")
+	// })
+	// r.Get("/alive", server.ServerAlive)
 
 	r.Get("/", server.Index)
 	r.Get("/new", server.CreateChatRoom)
@@ -27,5 +27,5 @@ func main() {
 		http.ServeFile(w, r, "./assets/chat.js")
 	})
 
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(":3000", r)
 }
