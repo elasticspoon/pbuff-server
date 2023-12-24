@@ -3,10 +3,10 @@ config:
   # It's designed to be highly scalable
   target: "http://127.0.0.1:3000"
   phases:
-    - duration: 30
+    - duration: 300
       arrivalRate: 20
       rampTo: 50
-      maxVusers: 1
+      maxVusers: 1000
       name: Test
   # Load & configure a couple of useful plugins
   # https://docs.art/reference/extensions

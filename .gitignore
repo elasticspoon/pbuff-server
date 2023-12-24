@@ -22,3 +22,4 @@ go.work
 tmp
 
 node_modules/
+node.json

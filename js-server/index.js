@@ -13,20 +13,19 @@ const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
 wss.on("connection", function (ws) {
-  const id = setInterval(function () {
-    ws.send(JSON.stringify(process.memoryUsage()), function () {
-      //
-      // Ignore errors.
-      //
+  console.log("Client connected");
+  ws.on("message", function message(data, isBinary) {
+    wss.clients.forEach(function each(client) {
+      if (client.readyState === 1) {
+        client.send(data, { binary: isBinary });
+      }
     });
-  }, 100);
-  console.log("started client interval");
+  });
 
   ws.on("error", console.error);
 
   ws.on("close", function () {
-    console.log("stopping client interval");
-    clearInterval(id);
+    console.log("closing connection");
   });
 });
 

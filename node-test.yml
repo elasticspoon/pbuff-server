@@ -3,10 +3,10 @@ config:
   # It's designed to be highly scalable
   target: "http://127.0.0.1:8080"
   phases:
-    - duration: 30
+    - duration: 10
       arrivalRate: 20
       rampTo: 50
-      maxVusers: 1
+      maxVusers: 1000
       name: Test
   # Load & configure a couple of useful plugins
   # https://docs.art/reference/extensions
@@ -25,7 +25,7 @@ scenarios:
     name: Echo a string
     flow:
       - connect: "ws://127.0.0.1:8080"
+      - think: 1
       - loop:
-          - send:
-              body: "{{ loopCount }}"
+          - send: "some message"
         count: 1000
