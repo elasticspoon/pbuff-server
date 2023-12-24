@@ -24,3 +24,6 @@ tmp
 node_modules/
 node.json
 bench-server/.direnv
+bench-server/log
+bench-server/storage
+bench-server/vendor
