@@ -23,3 +23,4 @@ tmp
 
 node_modules/
 node.json
+bench-server/.direnv
