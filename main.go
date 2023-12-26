@@ -5,13 +5,13 @@ import (
 
 	"github.com/elasticspoon/pbuff-server/server"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/v5/middleware"
+	// "github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Logger)
+	// r.Use(middleware.Logger)
 
 	// r.Get("/livereload.js", func(w http.ResponseWriter, r *http.Request) {
 	// 	http.ServeFile(w, r, "./assets/livereload.js")

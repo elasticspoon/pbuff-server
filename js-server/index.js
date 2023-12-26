@@ -16,9 +16,7 @@ wss.on("connection", function (ws) {
   console.log("Client connected");
   ws.on("message", function message(data, isBinary) {
     wss.clients.forEach(function each(client) {
-      if (client.readyState === 1) {
-        client.send(data, { binary: isBinary });
-      }
+      client.send(data, { binary: isBinary });
     });
   });
 
