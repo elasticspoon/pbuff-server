@@ -11,7 +11,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var chatRooms = make([]*ChatRoom, 0)
+var (
+	chatRooms  = make(map[int]*ChatRoom)
+	chatRoomId = 0
+)
 
 type Message struct {
 	Body string `json:"body"`
@@ -56,20 +59,30 @@ func ShowChat(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func DeleteChat(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	chatRoomId := chi.URLParam(r, "chatRoomId")
+	id, err := strconv.Atoi(chatRoomId)
+	if err != nil {
+		log.Printf("Error converting chatRoomId to int: %s", err)
+	}
+
+	if _, ok := chatRooms[id]; !ok {
+		log.Printf("Chat room does not exist: %d", id)
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
+
+	delete(chatRooms, id)
+	// http.Redirect(w, r, "/", http.StatusFound)
+}
+
 func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	cr := NewChatRoom()
-	id := 0
-	for ; id < len(chatRooms); id++ {
-		if chatRooms[id] == nil {
-			break
-		}
-	}
-	cr.Id = id
-	if id == len(chatRooms) {
-		chatRooms = append(chatRooms, cr)
-	} else {
-		chatRooms[id] = cr
-	}
+
+	cr.Id = chatRoomId
+	chatRooms[chatRoomId] = cr
+	chatRoomId++
 
 	go cr.Run()
 
@@ -90,7 +103,7 @@ func JoinChatRoom(w http.ResponseWriter, r *http.Request) {
 	}
 	cr := chatRooms[id]
 
-	log.Printf("Joining chat room: %d", id)
+	// log.Printf("Joining chat room: %d", id)
 	ServeWs(cr, w, r)
 }
 

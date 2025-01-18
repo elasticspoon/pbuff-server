@@ -21,7 +21,7 @@ Existing browser measures, such as Load and DOMContentLoaded times, no longer ac
 });
 
 export const options = {
-  vus: 10,
+  vus: 1000,
   duration: "10s",
 };
 
@@ -31,19 +31,21 @@ export default function () {
 
   var response = ws.connect(url, params, function (socket) {
     socket.on("open", function open() {
-      console.log("connected");
+      // console.log("connected");
       socket.send(sub_cmd);
-      socket.send(send_command);
+      socket.setInterval(() => {
+        socket.send(send_command);
+      }, 1000);
     });
 
     socket.on("message", function incoming() {
-      socket.setTimeout(function () {
-        socket.send(send_command);
-      }, 200);
+      // socket.setTimeout(function () {
+      //   socket.send(send_command);
+      // }, 200);
     });
 
     socket.on("close", function close() {
-      console.log("disconnected");
+      // console.log("disconnected");
     });
 
     socket.on("error", function (e) {
@@ -53,7 +55,7 @@ export default function () {
     });
 
     socket.setTimeout(function () {
-      console.log("10 seconds passed, closing the socket");
+      // console.log("10 seconds passed, closing the socket");
       socket.close();
     }, 10000);
   });

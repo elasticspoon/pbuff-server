@@ -21,6 +21,7 @@ func main() {
 	r.Get("/", server.Index)
 	r.Get("/new", server.CreateChatRoom)
 	r.Get("/chat/{chatRoomId}", server.ShowChat)
+	r.Delete("/chat/{chatRoomId}", server.DeleteChat)
 
 	r.Get("/ws/{chatRoomId}", server.JoinChatRoom)
 	r.Get("/chat.js", func(w http.ResponseWriter, r *http.Request) {

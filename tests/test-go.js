@@ -13,47 +13,64 @@ const message = JSON.stringify({
 });
 
 export const options = {
-  vus: 10,
-  duration: "10s",
+  vus: 10000,
+  duration: "30s",
 };
 
+let rooms = options.vus / 2;
+const url = "http://localhost:3000";
+const params = { tags: { my_tag: "hello" } };
+
 export function setup() {
-  const url = "http://localhost:3000";
-  const res = http.get(url + "/new");
-  check(res, { "status is 200": (r) => r && r.status === 200 });
+  for (let i = 0; i < rooms; i++) {
+    const res = http.get(url + "/new");
+    check(res, { "status is 200": (r) => r && r.status === 200 });
+  }
 }
 
 export default function () {
-  const url = "ws://localhost:3000/ws/0";
-  var params = { tags: { my_tag: "hello" } };
+  const wsUrl = "ws://localhost:3000/ws/" + Math.floor(Math.random() * rooms);
 
-  var response = ws.connect(url, params, function (socket) {
+  var response = ws.connect(wsUrl, params, function (socket) {
     socket.on("open", function open() {
-      console.log("connected");
-      socket.send(message);
+      // console.log("connected");
+      socket.setInterval(() => {
+        socket.send(message);
+      }, 1000);
+      // socket.send(message);
     });
 
-    socket.on("message", function incoming() {
-      socket.setTimeout(function () {
-        socket.send(message);
-      }, 200);
+    socket.on("message", function incoming(e) {
+      // socket.setTimeout(function () {
+      //   socket.send(message);
+      // }, 200);
     });
 
     socket.on("close", function close() {
-      console.log("disconnected");
+      // console.log("disconnected");
     });
 
     socket.on("error", function (e) {
-      if (e.error() != "websocket: close sent") {
-        console.log("An unexpected error occurred: ", e.error());
-      }
+      // if (e.error() != "websocket: close sent") {
+      //   console.log("An unexpected error occurred: ", e.error());
+      // }
     });
 
-    socket.setTimeout(function () {
-      console.log("10 seconds passed, closing the socket");
-      socket.close();
-    }, 10000);
+    socket.setTimeout(
+      function () {
+        socket.close();
+      },
+      // parseInt(options.duration) * 60 * 1000,
+      parseInt(options.duration) * 1000,
+    );
   });
 
   check(response, { "status is 101": (r) => r && r.status === 101 });
+}
+
+export function teardown() {
+  for (let i = 0; i < rooms; i++) {
+    const res = http.del(url + "/chat/" + i);
+    check(res, { "status is 200": (r) => r && r.status === 200 });
+  }
 }
